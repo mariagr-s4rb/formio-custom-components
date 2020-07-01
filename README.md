@@ -40,6 +40,15 @@ Or you can use the **formio-contrib.use.min.js** file which automatically adds t
 ```
 
 ### Using within the Form.io Developer Portal
+- Build the minified js
+```bash
+npm run prepublish
+```
+- Save the generated `/dist/formio-contrib.use.min.js` in a public storage
+
+- Import it on https://next.form.io/ following the steps below.
+
+
 It is also possible to inject custom components within the Form.io Developer Portal. This allows you to use the Developer Portal to create forms that include your custom components. Note: This currently only works with the Next portal @ https://next.form.io
 
 To make this work, navigate to your project settings, and then click on **Custom JS and CSS**. Within the **Custom JavaScript** box, you will then place the hosted URL to the **dist/formio-contrib.use.min.js** file within this library, like so.
