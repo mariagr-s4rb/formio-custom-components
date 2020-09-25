@@ -77,15 +77,12 @@ export default class CustomSelect extends (FieldComponent as any) {
     const refs = {};
     refs[`${this.component.key}`] = 'customselect'
     this.loadRefs(element, refs);
-    console.log({ref: this.refs, element, component: this.component});
     const input = this.refs[`${this.component.key}`][0];
-    console.log({input});
     if(!input) {
       return;
     }
     this.addEventListener(input, 'keyup', async (event) => {
       const { key } = event;
-      console.log({url: this.component.apiUrl});
       if (event.target.value.length % 3 === 0) {
         const results = await fetch(
           `${this.component.apiUrl}/${event.target.value}`,
@@ -96,7 +93,6 @@ export default class CustomSelect extends (FieldComponent as any) {
             }
         });
         this.values = await results.json();
-        console.log({values: this.values});
       }
 
       if (['Backspace', 'Delete'].includes(key)) {
