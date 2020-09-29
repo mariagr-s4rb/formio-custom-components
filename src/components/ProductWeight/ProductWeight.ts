@@ -6,7 +6,15 @@
 import { Components } from 'formiojs';
 // const FieldComponent = (Components as any).components.field;
 const FieldComponent = (Components as any).components.base;
-import editForm from './CustomSelect.form';
+import editForm from './ProductWeight.form';
+
+declare global {
+  interface Window { productId: string; }
+}
+
+interface Product {
+  weight: string
+}
 
 /**
  * Here we will derive from the base component which all Form.io form components derive from.
@@ -16,9 +24,10 @@ import editForm from './CustomSelect.form';
  * @param data
  * @constructor
  */
-export default class CustomSelect extends (FieldComponent as any) {
+export default class ProductWeight extends (FieldComponent as any) {
   public inputValue: string;
   public values: string[];
+  public product: Product;
   constructor(component, options, data) {
     super(component, options, data);
     this.values = [];
@@ -26,7 +35,7 @@ export default class CustomSelect extends (FieldComponent as any) {
 
   static schema() {
     return FieldComponent.schema({
-      type: 'customselect',
+      type: 'productweight',
       apiUrl: '',
       data:{
         value: '',
@@ -38,12 +47,12 @@ export default class CustomSelect extends (FieldComponent as any) {
   public static editForm = editForm;
 
   static builderInfo = {
-    title: 'Custom Select',
+    title: 'Product Weight',
     group: 'basic',
     icon: 'fa fa-table',
     weight: 70,
     documentation: 'http://help.form.io/userguide/#table',
-    schema: CustomSelect.schema()
+    schema: ProductWeight.schema()
   }
 
   renderInput() {
@@ -60,8 +69,8 @@ export default class CustomSelect extends (FieldComponent as any) {
       }
     });
   }
-  public render(children) {
-    return super.render(this.renderTemplate('customselect', {
+  public render() {
+    return super.render(this.renderTemplate('productweight', {
       renderInput: this.renderInput.bind(this)
     }));
   }
@@ -75,28 +84,27 @@ export default class CustomSelect extends (FieldComponent as any) {
    */
   attach(element) {
     const refs = {};
-    refs[`${this.component.key}`] = 'customselect'
+    refs[`${this.component.key}`] = 'productweight'
     this.loadRefs(element, refs);
     const input = this.refs[`${this.component.key}`][0];
     if(!input) {
       return;
     }
     this.addEventListener(input, 'keyup', async (event) => {
-      const { key } = event;
-      if (event.target.value.length % 3 === 0) {
-        const results = await fetch(
-          `${this.component.apiUrl}/${event.target.value}`,
+      const productId = window.productId
+      if (productId) {
+        const result = await fetch(
+          `${this.component.apiUrl}/${productId}`,
           {
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.token}`,
             }
         });
-        this.values = await results.json();
-      }
-
-      if (['Backspace', 'Delete'].includes(key)) {
-        this.setValue(this.emptyValue, []);
+        this.product = await result.json();
+        this.setValue(this.product.weight)
+        // this.component.weight = result.weight
+      } else {
+        this.setValue('100 kilos');
       }
     });
     // Allow basic component functionality to attach like field logic and tooltips.
@@ -119,11 +127,11 @@ export default class CustomSelect extends (FieldComponent as any) {
    * @param value
    * @returns {boolean}
    */
-  setValue(value, values) {
+  setValue(value) {
     if (!value) {
       return;
     }
     this.inputValue = value;
-    this.values = values;
+    this.render();
   }
 }
